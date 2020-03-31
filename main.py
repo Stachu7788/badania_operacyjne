@@ -14,24 +14,14 @@ from floyd_warshall import floyd_warshall    #(List[int},float) or Map
 from kruskal import kruskal                  #(List[Tuple],float)
 
     
-#
-#G=Graph(*make_net_graph(20,25,10))
-#G.draw('c',lw=0.6,savefig='fig.png')
+
+G=Graph(*make_net_graph(20,25,10))
+G.draw('c',lw=0.6,savefig='fig.png')
 
 
-a,b=15,6
-p1,c1=dijkstra(G,a,b)
-p2,c2=a_star(G,a,b)
-p3,c3=bellman_ford(G,a,b)
-p4,c4=floyd_warshall(G,a,b)
-for p,c in ((p1,'g'),(p2,'k'),(p3,'r'),(p4,'m')):
-    G.draw(p,c,lw=0.7)
+a=bellman_ford(G,5)
+con=bellman_ford(G,5)
+G.draw(con)
 
-
-
-con,cost=prima(G)
-con2,cost2=kruskal(G)
-G.draw(con,'m',lw=0.5,title='prima')
-G.draw(con2,'r',lw=0.5,title='kruskal')
-print(G[18][10])
-
+b=str(bellman_ford)
+print(b)

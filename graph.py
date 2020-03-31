@@ -62,6 +62,7 @@ class Graph:
                 mode='connections'
         elif type(args[0]) is Map:
             mode='connections'
+            args=(args[0].get_connections(),*args[1:])
         functions= {'graph'      :   getattr(self,'__draw_graph__'),
                     'path'       :   getattr(self,'__draw_path__'),
                     'connections':   getattr(self,'__draw_connections__')}

@@ -1,5 +1,5 @@
 import numpy as np
-import copy
+from copy import deepcopy
 from graph import Graph
 from simple_map import Map
 
