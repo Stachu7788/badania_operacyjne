@@ -1,11 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 
 from timeit import default_timer as timer
 from copy import deepcopy
 
-from make_matrix import make_net_graph
+from make_matrix import create_matrix
 from simple_queue import Queue
 from simple_map import Map
 from graph import Graph
@@ -18,19 +17,14 @@ from floyd_warshall import floyd_warshall    #(List[int},float) or Map
 from kruskal import kruskal                  #(List[Tuple],float)
 
 
-#G=Graph(*make_net_graph(30,20,5))
+#G=Graph(*create_matrix(50,25,5))
 G.draw(savefig='fig.png')
-G.draw(prima(G)[0],savefig='fig2.png')
 
 
-
-#G.draw(kruskal(G)[0],title='mst')
-
-
-#con,cost=prima(G)
-#G.draw(con,'r',savefig='fig.png')
-
-#path,cst=a_star(G,11,9)
+con,cost=prima(G)
+G.draw(con,lw=0.6,title="Prima")
+con,cost2=kruskal(G)
+G.draw(con,lw=0.6,title="Kruskal")
 
 #func=[dijkstra,a_star,bellman_ford,floyd_warshall]
 #times=[]
@@ -40,5 +34,10 @@ G.draw(prima(G)[0],savefig='fig2.png')
 #    times.append(timer()-start)
 #print("Dijkstra:       {}\nA star:         {}\nBellman-Ford:   {}\nFloyd-Warshall: {}".format(*times))
 #
-#
-#    
+#func=[prima,kruskal]
+#times=[]
+#for f in func:
+#    start=timer()
+#    f(G)
+#    times.append(timer()-start)
+#print("Prima:   {}\nKruskal: {}".format(*times))
