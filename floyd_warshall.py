@@ -5,7 +5,7 @@ from simple_map import Map
 
 def floyd_warshall(G:Graph,start=None,stop=None):
     n=len(G)
-    d=copy.deepcopy(G.matrix_)
+    d=deepcopy(G.matrix_)
     prev=np.multiply(np.arange(n,dtype=int),np.ones([n,n],dtype=int)).T.tolist()
     for u in range(n):
         for v1 in range(n):

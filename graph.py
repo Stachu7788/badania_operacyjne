@@ -12,24 +12,9 @@ get_closest(id) -> Najbliższy sąsiad
 get_reachable(id) -> Kolejka sąsiadów
 """
 class Graph:
-    def __init__(self,M: List[List],*args):
-        self.matrix_=M
-        self.size_=len(M)
-        self.queue_=Queue()
-        self.cons_=[]
-        if len(args)==3:
-            self.h_=args[0]
-            self.x_=args[1]
-            self.y_=args[2]
-        if len(args)==2:
-            self.x_=args[0]
-            self.y_=args[1]
-        for i in range(self.size_):
-            for j in range(i+1,self.size_):
-                if self.matrix_[i][j]<np.inf:
-                    self.cons_.append((i,j))
-                    self.queue_.add((M[i][j],i,j))
-                   
+    def __init__(self,*args):
+        self.__assign_variables__(*args)
+
     def __getitem__(self,index:int):
         return self.matrix_[index]
     
@@ -47,20 +32,22 @@ class Graph:
             y[1][i]=self.y_[cons[i][1]]
         return (x,y)
     
-    def __points__(self):
-        plt.scatter(self.x_,self.y_,marker='.')
+    def __points__(self,mark):
+        if not mark:
+            mark='.'
+        plt.scatter(self.x_,self.y_,marker=mark)
         for i in range(self.size_):
-            plt.annotate(i,(self.x_[i],self.y_[i]))
+            plt.annotate(self.labels[i],(self.x_[i],self.y_[i]))
                     
     def draw(self,*args,**kwargs):
         title=kwargs.pop('title',None)
         mode='graph'                            #default mode
-        if type(args[0]) is list:
+        if args and type(args[0]) is list:
             if type(args[0][0]) is int:
                 mode='path'
             elif type(args[0][0]) is tuple:
                 mode='connections'
-        elif type(args[0]) is Map:
+        elif args and type(args[0]) is Map:
             mode='connections'
             args=(args[0].get_connections(),*args[1:])
         functions= {'graph'      :   getattr(self,'__draw_graph__'),
@@ -75,32 +62,27 @@ class Graph:
         f(*args,**kwargs,title=title)
             
     def __draw_graph__(self,*args,**kwargs):
-        self.__points__()
-        filetitle=kwargs.pop('savefig',None)
-        title=kwargs.pop('title')
         x,y=self.__make_connections__(self.cons_)
-        plt.plot(x,y,*args,**kwargs)
-        plt.title(title)
-        if filetitle:
-            plt.savefig(filetitle)
-        plt.show()
+        self.__plot__(x,y,*args,**kwargs)
         
     def __draw_connections__(self,cons:List[Tuple],*args,**kwargs):
-        self.__points__()
-        filetitle=kwargs.pop('savefig',None)
-        title=kwargs.pop('title')
         x,y=self.__make_connections__(cons)
-        plt.plot(x,y,*args,**kwargs)
-        plt.title(title)
-        if filetitle:
-            plt.savefig(filetitle)
-        plt.show()
+        self.__plot__(x,y,*args,**kwargs)
+
         
     def __draw_path__(self,path:List,*args,**kwargs):
-        self.__points__()
+        x,y=self.x_[path],self.y_[path]
+        self.__plot__(x,y,*args,**kwargs)
+        
+    def __plot__(self,x,y,*args,**kwargs):
+        if not args:
+            args=tuple('b')
+        if not kwargs.get('lw'):
+            kwargs['lw']=0.5
+        self.__points__(kwargs.pop('marker',None))
         filetitle=kwargs.pop('savefig',None)
         title=kwargs.pop('title')
-        plt.plot(self.x_[path],self.y_[path],*args,**kwargs)
+        plt.plot(x,y,*args,**kwargs)
         plt.title(title)
         if filetitle:
             plt.savefig(filetitle)
@@ -112,7 +94,7 @@ class Graph:
     def get_neighbours(self,id:int):
         lst=[]
         for i in range(self.size_):
-            if self.matrix_[id][i]<np.inf:
+            if self.matrix_[id][i]<np.inf and id != i: 
                 lst.append(i)
         return lst
     
@@ -131,3 +113,92 @@ class Graph:
             if 0<self.matrix_[id][i]<np.inf and id != i:
                 q_.add((self.matrix_[id][i],id,i))
         return q_
+    
+    
+    def __calculate_distances__(self,x,y,con):
+        if len(x) is not len(y):
+            raise Exception("Invalid data")
+        else:
+            n=len(x)
+            H=np.zeros([n,n]).tolist()
+            M=(np.inf*np.ones([n,n])).tolist()
+            for i in range(n):
+                H[i][i]=M[i][i]=0
+                for j in range(i+1,n):
+                    H[i][j]=H[j][i]=round(np.sqrt((x[i]-x[j])**2+(y[i]-y[j])**2),2)
+                    if (i,j) in con or (j,i) in con:
+                        M[i][j]=M[j][i]=H[i][j]
+            return M,H
+            
+    def arg_parser(func):
+        def wrapper(self,*args):
+            
+            arg_order={1    :   'M',    # Possible inputs:
+                       2    :   'H',    # M H x y (l)
+                       3    :   'x',    # M x y (l)
+                       4    :   'y',    # x y C (l)
+                       5    :   'C',    # M (l)
+                       6    :   'l'}
+            
+            for i in range(len(args)):
+                if type(args[i]) is np.ndarray:
+                    args=*args[:i],args[i].tolist(),*args[i+1:]
+            M,H,x,y,C,l=6*[None]
+            if type(args[0][0]) is list:   #is first (n,n)
+                M,args=args[0],args[1:]
+            if args and type(args[0][0]) is list:   #is second (n,n)
+                H,args=args[0],args[1:]
+            if args and type(args[0][0]) is int:
+                x,args=args[0],args[1:]
+                y,args=args[0],args[1:]
+            if args and type(args[0]) is list and type(args[0][0]) is tuple:
+                C,args=args[0],args[1:]
+            if args and type(args[0]) is list:
+                l,args=args[0],args[1:]
+            if not M:
+                M,H=self.__calculate_distances__(x,y,C)
+            kw_dct={}
+            vars=M,H,x,y,C,l
+            for i in range(6):
+                if vars[i]:
+                    kw_dct[arg_order[i+1]]=vars[i]
+            func(self,**kw_dct)
+                
+        return wrapper
+            
+    @arg_parser
+    def __assign_variables__(self,*args,**dict_args):
+        self.matrix_=dict_args.pop('M',None)
+        self.H=dict_args.pop('H',None)
+        self.x_=dict_args.pop('x',None)
+        self.y_=dict_args.pop('y',None)
+        self.size_=len(self.matrix_)
+        self.labels=dict_args.pop('l',None)
+        if not self.labels or len(self.labels) != self.size_:
+            self.labels=np.arange(0,self.size_).tolist()
+        self.queue_=Queue()
+        self.cons_=dict_args.pop('C',[])
+        if not self.cons_:
+            for i in range(self.size_):
+                for j in range(i+1,self.size_):
+                    if self[i][j]<np.inf:
+                        self.cons_.append((i,j))
+                        self.queue_.add((self[i][j],i,j))
+        else:
+            for i,j in self.cons_:
+                self.queue_.add((self.matrix_[i][j],i,j))
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            

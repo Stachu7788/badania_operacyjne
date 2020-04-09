@@ -25,7 +25,7 @@ class Map:
     def __next__(self):
         if self.iterator<len(self.dct):
             self.iterator+=1
-            return self.iterator-1
+            return self.dct[self.iterator-1]
         else:
             raise StopIteration
             
@@ -37,6 +37,9 @@ class Map:
                 
     def __str__(self):
         return self.dct.__str__()
+    
+    def __contains__(self,key):
+        return self.dct[key][0]<np.inf and self.dct[key][1]
     
     def items(self):
         return self.dct.items()
