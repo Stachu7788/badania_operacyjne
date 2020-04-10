@@ -43,7 +43,7 @@ class Map:
         return self.dct.__str__()
 
     def __contains__(self, key):
-        return self.dct[key][0] < np.inf and self.dct[key][1]
+        return self.dct[key][0] < np.inf and self.dct[key][1] is not None
 
     def items(self):
         return self.dct.items()

@@ -17,14 +17,30 @@ from floyd_warshall import floyd_warshall    #(List[int},float) or Map
 from kruskal import kruskal                  #(List[Tuple],float)
 
 
-#G=Graph(*create_matrix(50,25,5))
-G.draw(savefig='fig.png')
 
 
-con,cost=prima(G)
-G.draw(con,lw=0.6,title="Prima")
-con,cost2=kruskal(G)
-G.draw(con,lw=0.6,title="Kruskal")
+#g1=Graph(*create_matrix(15,10,4))
+g1.labels=np.arange(0,15).tolist()
+g1.draw()
+path,cst=a_star(g1,12,6)
+g1.draw(path,title="Koszt: {}".format(cst))
+
+
+
+
+
+##G=Graph(*create_matrix(15,10,4))
+#print(len(G.cons_))
+#G.draw()
+##a=G.x_
+#path,cost=a_star(G,12,3)
+#G.draw(path)
+##print(G)
+
+#con,cost=prima(G)
+#G.draw(con,lw=0.6,title="Prima")
+#con,cost2=kruskal(G)
+#G.draw(con,lw=0.6,title="Kruskal")
 
 #func=[dijkstra,a_star,bellman_ford,floyd_warshall]
 #times=[]

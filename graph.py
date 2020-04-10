@@ -33,6 +33,9 @@ class Graph:
 
     def __len__(self):
         return self.size_
+    
+    def __str__(self):
+        return np.array(self.matrix_).__str__()
 
     def __make_connections__(self, cons: List[Tuple]):
         n = len(cons)
@@ -83,7 +86,11 @@ class Graph:
         self.__plot__(x, y, *args, **kwargs)
 
     def __draw_path__(self, path: List, *args, **kwargs):
-        x, y = self.x_[path], self.y_[path]
+        x=[]
+        y=[]
+        for i in path:
+            x.append(self.x_[i])
+            y.append(self.y_[i])
         self.__plot__(x, y, *args, **kwargs)
 
     def __plot__(self, x, y, *args, **kwargs):

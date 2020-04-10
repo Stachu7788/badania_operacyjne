@@ -6,6 +6,7 @@ def bellman_ford(G: Graph, start: int, stop: int = None):
     n = len(G)
     tab = Map(start, n)
     for useless_variable in range(n-1):
+        print(tab)
         for u, v in G.cons_:
             if tab[u][0] > tab[v][0] + G[u][v]:
                 tab[u][0] = round(tab[v][0]+G[u][v], 2)
