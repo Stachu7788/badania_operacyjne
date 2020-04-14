@@ -8,9 +8,9 @@ import copy
 Graph
 
 Możliwe parametry wejściowe:
-    M H x y (l)
-    M x y (l)
-    x y C (l)
+    M H x y
+    M x y
+    x y C
     M              *bez rysowania
 
 draw(*args,**kwargs) -> Rysowanie grafu/połączeń/trasy
@@ -54,6 +54,9 @@ class Graph:
         plt.scatter(self.x_, self.y_, marker=mark)
         for i in range(self.size_):
             plt.annotate(self.labels[i], (self.x_[i], self.y_[i]))
+            
+    def H(self):
+        return self.H
 
     def draw(self, *args, **kwargs):
         title = kwargs.pop('title', None)
@@ -110,27 +113,28 @@ class Graph:
     def get_queue(self):
         return copy.deepcopy(self.queue_)
 
-    def get_neighbours(self, id: int):
-        lst = []
-        for i in range(self.size_):
-            if self.matrix_[id][i] < np.inf and id != i:
-                lst.append(i)
-        return lst
+    def get_neighbours(self, id: int) -> List[int]:
+        return self.succ[id]
+
+    def get_succesors(self, id: int) -> List[int]:
+        return self.succ[id]
+
+    def get_predecessors(self, id: int) -> List[int]:
+        return self.pred[id]
 
     def get_closest(self, id: int) -> int:
-        dst = np.inf
-        ret = None
-        for i in range(self.size_):
-            if 0 < self.matrix_[id][i] < dst:
-                dst = self.matrix_[id][i]
-                ret = i
-        return ret
+        max_dist = np.inf
+        closest = None
+        for succ in self.succ[id]:
+            if self.matrix_[id][succ] < max_dist:
+                closest = succ
+                max_dist = self.matrix_[id][succ]
+        return closest
 
-    def get_reachable(self, id: int):
+    def get_reachable(self, id: int) -> Queue:
         q_ = Queue()
-        for i in range(self.size_):
-            if 0 < self.matrix_[id][i] < np.inf and id != i:
-                q_.add((self.matrix_[id][i], id, i))
+        for succ in self.succ[id]:
+            q_.add((self.matrix_[id][succ], id, succ))
         return q_
 
     def __calculate_distances__(self, x, y, con):
@@ -186,12 +190,15 @@ class Graph:
 
     @__arg_parser__
     def __assign_variables__(self, *args, **dict_args):
-        self.matrix_ = dict_args.pop('M', None)
+        m_ = self.matrix_ = dict_args.pop('M', None)
         self.H = dict_args.pop('H', None)
         self.x_ = dict_args.pop('x', None)
         self.y_ = dict_args.pop('y', None)
         self.size_ = len(self.matrix_)
+        s_ = self.succ = dict.fromkeys(np.arange(0, self.size_).tolist(), [])
+        p_ = self.pred = dict.fromkeys(np.arange(0, self.size_).tolist(), [])
         self.labels = dict_args.pop('l', None)
+        self.neighbours = {}
         if not self.labels or len(self.labels) != self.size_:
             self.labels = np.arange(0, self.size_).tolist()
         self.queue_ = Queue()
@@ -205,3 +212,8 @@ class Graph:
         else:
             for i, j in self.cons_:
                 self.queue_.add((self.matrix_[i][j], i, j))
+        for i in range(self.size_):
+            for j in range(self.size_):
+                if 0 < self.matrix_[i][j] < np.inf:
+                    self.succ[i].append(j)
+                    self.pred[j].append(i)

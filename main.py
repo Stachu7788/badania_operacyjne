@@ -19,11 +19,11 @@ from kruskal import kruskal                  #(List[Tuple],float)
 
 
 
-#g1=Graph(*create_matrix(15,10,4))
-g1.labels=np.arange(0,15).tolist()
-g1.draw()
-path,cst=a_star(g1,12,6)
-g1.draw(path,title="Koszt: {}".format(cst))
+G=Graph(*create_matrix(25,25,30,dst=7))
+G.draw()
+a = G.succ
+path,cst=a_star(G,12,6)
+G.draw(path,title="Koszt: {}".format(cst))
 
 
 

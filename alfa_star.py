@@ -5,12 +5,10 @@ from simple_map import Map
 
 def a_star(G: Graph, start: int, stop: int):
     H = G.H
-    open = Queue()
+    open = G.get_reachable(start)
     closed = Map(start, len(G))
     op=open.lst
     cl=closed.dct
-    for u in G.get_neighbours(start):
-        open.add([G[start][u]+H[u][stop], start, u])
     while True:
         f, u, x = open.get()
         g = f-H[x][stop]
