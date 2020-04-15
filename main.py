@@ -19,9 +19,8 @@ from kruskal import kruskal                  #(List[Tuple],float)
 
 
 
-G=Graph(*create_matrix(25,25,30,dst=7))
+#G=Graph(*create_matrix(25,25,30,dst=7))
 G.draw()
-a = G.succ
 path,cst=a_star(G,12,6)
 G.draw(path,title="Koszt: {}".format(cst))
 

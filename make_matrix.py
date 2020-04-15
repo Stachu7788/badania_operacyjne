@@ -37,4 +37,4 @@ def create_matrix(height: int, width: int, nodes: int = 10, **dct):
             M[u][v] = M[v][u] = dst
     else:
         M = np.where(T[:][:] <= dst, T[:][:], np.inf)
-    return M, T, x, y
+    return M, T, x, y, con

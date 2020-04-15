@@ -176,8 +176,6 @@ class Graph:
                 y, args = args[0], args[1:]
             if args and type(args[0]) is list and type(args[0][0]) is tuple:
                 C, args = args[0], args[1:]
-            if args and type(args[0]) is list:
-                L, args = args[0], args[1:]
             if not M:
                 M, H = self.__calculate_distances__(x, y, C)
             kw_dct = {}
@@ -188,21 +186,36 @@ class Graph:
             func(self, **kw_dct)
         return wrapper
 
+    def is_directed(self) -> bool:
+        return self.dir_
+
     @__arg_parser__
     def __assign_variables__(self, *args, **dict_args):
         m_ = self.matrix_ = dict_args.pop('M', None)
+        if np.array_equal(np.array(self.matrix_),np.array(self.matrix_).T):
+            self.dir_ = False
+        else:
+            self.dir_ = True
         self.H = dict_args.pop('H', None)
         self.x_ = dict_args.pop('x', None)
         self.y_ = dict_args.pop('y', None)
         self.size_ = len(self.matrix_)
-        s_ = self.succ = dict.fromkeys(np.arange(0, self.size_).tolist(), [])
-        p_ = self.pred = dict.fromkeys(np.arange(0, self.size_).tolist(), [])
-        self.labels = dict_args.pop('l', None)
-        self.neighbours = {}
-        if not self.labels or len(self.labels) != self.size_:
-            self.labels = np.arange(0, self.size_).tolist()
+        s_ = self.succ = {}
+        p_ = self.pred = {}
+        for i in range(self.size_):
+            self.succ[i] = []
+            self.pred[i] = []
+        self.labels = np.arange(0, self.size_).tolist()
         self.queue_ = Queue()
         self.cons_ = dict_args.pop('C', [])
+        for i in range(self.size_):
+            for j in range(i+1, self.size_):
+                if 0 < self.matrix_[i][j] < np.inf:
+                    self.succ[i].append(j)
+                    self.pred[j].append(i)
+                if 0 < self.matrix_[j][i] < np.inf:
+                    self.succ[j].insert(0, i)
+                    self.pred[i].insert(0, j)
         if not self.cons_:
             for i in range(self.size_):
                 for j in range(i+1, self.size_):
@@ -212,8 +225,4 @@ class Graph:
         else:
             for i, j in self.cons_:
                 self.queue_.add((self.matrix_[i][j], i, j))
-        for i in range(self.size_):
-            for j in range(self.size_):
-                if 0 < self.matrix_[i][j] < np.inf:
-                    self.succ[i].append(j)
-                    self.pred[j].append(i)
+        
