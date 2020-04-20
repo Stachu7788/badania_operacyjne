@@ -17,17 +17,25 @@ from floyd_warshall import floyd_warshall    #(List[int],float) or Map or
                                              #(List[float],List[int])
 from kruskal import kruskal                  #(List[Tuple],float)
 
-M=[[0, 3, 5, np.inf],
-   [2, 0, np.inf, 4],
-   [1, np.inf, 0, 6],
-   [np.inf, 8, 2, 0]]
-M=np.array(M)
-H=Graph(M,[1,2,1,2],[2,2,1,1])
-H.draw()
+#M=[[0, 3, 5, 2],
+#   [2, 0, np.inf, 4],
+#   [1, np.inf, 0, 6],
+#   [np.inf, 8, 2, 0]]
+#N=[[0,3,5,2],
+#   [3,0,np.inf,4],
+#   [5,np.inf,0,6],
+#   [2,4,6,0]]
+#M=np.array(M)
+#H=Graph(M,[1,2,1,2],[2,2,1,1])
+#J=Graph(N,[1,2,1,2],[2,2,1,1])
+#path=dijkstra(H,1,2)[0]
+#
+#H.draw(annotate=True)
+#J.draw(annotate=True)
 
 
-path,cost=dijkstra(H,3,0)
-path2,cost2=dijkstra(H,0,3)
+#path,cost=dijkstra(H,3,0)
+#path2,cost2=dijkstra(H,0,3)
 
 #G=Graph(*create_matrix(25,25,30,dst=7))
 #G.draw()
@@ -70,16 +78,6 @@ path2,cost2=dijkstra(H,0,3)
 #    f(G)
 #    times.append(timer()-start)
 #print("Prima:   {}\nKruskal: {}".format(*times))
-
-
-
-
-
-
-
-
-
-
 
 
 

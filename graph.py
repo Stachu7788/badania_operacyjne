@@ -57,13 +57,19 @@ class Graph:
 
     def _draw_graph(self, *args, **kwargs):
         x, y = self._make_connections(self._cons)
+        if 'annotate' in kwargs and kwargs['annotate']:
+            kwargs['annotate'] = self._annotations(self._cons)  
         self._plot(x, y, *args, **kwargs)
 
     def _draw_connections(self, cons: List[Tuple], *args, **kwargs):
         x, y = self._make_connections(cons)
+        if 'annotate' in kwargs and kwargs['annotate']:
+            kwargs['annotate'] = self._annotations(cons)            
         self._plot(x, y, *args, **kwargs)
 
     def _draw_path(self, path: List, *args, **kwargs):
+        if 'annotate' in kwargs and kwargs['annotate']:
+            kwargs['annotate'] = self._annotations(path)  
         x=[]
         y=[]
         for i in path:
@@ -76,10 +82,18 @@ class Graph:
             args = tuple('b')
         if not kwargs.get('lw'):
             kwargs['lw'] = 0.5
+        plt.axes((0.0,0.0,1.0,1.0))
+        annotations = kwargs.pop('annotate', None)
         self._points(kwargs.pop('marker', None))
         filetitle = kwargs.pop('savefig', None)
         title = kwargs.pop('title')
         plt.plot(x, y, *args, **kwargs)
+        if annotations:
+            for tup in annotations:
+                pos, kwrds = tup
+                plt.annotate(pos[0],pos[2],color='r')
+                if kwrds:
+                    plt.annotate('',*pos[1:],**kwrds)
         plt.title(title)
         if filetitle:
             plt.savefig(filetitle)
@@ -100,6 +114,27 @@ class Graph:
                     if (i, j) in con or (j, i) in con:
                         M[i][j] = M[j][i] = H[i][j]
             return M, H
+
+    def _annotations(self, arg: List[Tuple] or List[int]):
+        if type(arg[0]) is int:
+            arg, path = [], arg
+            for i in range(len(path)-1):
+                arg.append((path[i], path[i+1]))
+        ret = []
+        for u, v in arg:
+            s = self[u][v]
+            xy = float(self._x[u]), float(self._y[u])
+            if self._dir:
+                xytext = (1/3*self._x[v]+2/3*self._x[u], 
+                          1/3*self._y[v]+2/3*self._y[u])
+                arrowprops = {'arrowprops': {'arrowstyle': '<-'}}
+                ret.append(((s, xy, xytext), arrowprops))
+            else:
+                xytext =  (1/2*(self._x[u]+self._x[v]), 
+                           1/2*(self._y[u]+self._y[v]))
+                ret.append(((s, xy, xytext),{}))
+        return ret
+                
 
     def _arg_parser(func):
         def wrapper(self, *args):
