@@ -12,19 +12,33 @@ from graph import Graph
 from dijkstra import dijkstra                #(List[int},float) or Map
 from prima import prima                      #(List[Tuple],float)
 from alfa_star import a_star                 #(List[int],float)
-from bellman_ford import bellman_ford        #(List[int},float) or Map
-from floyd_warshall import floyd_warshall    #(List[int},float) or Map
+from bellman_ford import bellman_ford        #(List[int],float) or Map
+from floyd_warshall import floyd_warshall    #(List[int],float) or Map or
+                                             #(List[float],List[int])
 from kruskal import kruskal                  #(List[Tuple],float)
 
+M=[[0, 3, 5, np.inf],
+   [2, 0, np.inf, 4],
+   [1, np.inf, 0, 6],
+   [np.inf, 8, 2, 0]]
+M=np.array(M)
+H=Graph(M,[1,2,1,2],[2,2,1,1])
+H.draw()
 
 
+path,cost=dijkstra(H,3,0)
+path2,cost2=dijkstra(H,0,3)
 
 #G=Graph(*create_matrix(25,25,30,dst=7))
-G.draw()
-path,cst=a_star(G,12,6)
-G.draw(path,title="Koszt: {}".format(cst))
+#G.draw()
+#path,cost=bellman_ford(G,5,20)
+#G.draw(path,title=f'Koszt: {cost}')
+
+#a=np.random.randint(0,100,[9,9])
 
 
+#g=Graph(b)
+#print(g.cons_)
 
 
 
@@ -56,3 +70,16 @@ G.draw(path,title="Koszt: {}".format(cst))
 #    f(G)
 #    times.append(timer()-start)
 #print("Prima:   {}\nKruskal: {}".format(*times))
+
+
+
+
+
+
+
+
+
+
+
+
+

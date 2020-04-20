@@ -6,7 +6,7 @@ from simple_map import Map
 
 def floyd_warshall(G: Graph, start = None, stop = None):
     n = len(G)
-    d = deepcopy(G.matrix_)
+    d = G.M()
     prev = np.multiply(np.arange(n, dtype=int),
                        np.ones([n, n], dtype=int)).T.tolist()
     for u in range(n):
@@ -15,8 +15,7 @@ def floyd_warshall(G: Graph, start = None, stop = None):
                 if d[v1][v2] > d[v1][u] + d[u][v2]:
                     d[v1][v2] = round(d[v1][u]+d[u][v2], 2)
                     prev[v1][v2] = prev[u][v2]
-        print(np.array(d))
-    if start is None:       #start lub stop mogą mieć wartść 0
+    if start is None:
         return (d,prev)
     dct = Map(start,n)
     for i in range(n):

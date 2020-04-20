@@ -5,6 +5,9 @@ class Forest:
     """
     Zawiera drzewa typu:
         {id : Set[inne id wierzchołków w drzewie oraz id klucza]}
+        np:
+            {1 : {1, 2}} (po połączeniu drzewa 2 z drzewem 1)
+            {3 : {3}}
     """
     def __init__(self, lst):
         self.dct = {}
@@ -13,9 +16,11 @@ class Forest:
 
     def is_spannig(self):
         return not bool(len(self.dct)-1) 
-# Jeżeli jest więcej niż jedno drzewo w "lesie" to zwraca fałsz
+            # Jeżeli jest więcej niż jedno drzewo w "lesie" to zwraca fałsz
 
     def connect(self, u, v) -> bool:
+        # True - 2 drzewa zostały połączone w jedno
+        # False - wierzchołki już są w jednym drzewie
         for tree_id in self.dct:
             if u in self.dct[tree_id]:
                 u_tree = tree_id
@@ -31,9 +36,7 @@ class Forest:
 
 
 def kruskal(G: Graph):
-    M = G.matrix_
-    n = len(M)
-    L = Forest(np.arange(0, n, 1).tolist())
+    L = Forest(np.arange(0, len(G), 1).tolist())
     con = []
     total = 0
     Q = G.get_queue()

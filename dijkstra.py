@@ -4,9 +4,9 @@ from simple_map import Map
 
 
 def dijkstra(G: Graph, start: int, stop: int = None):
-    dct = Map(start, G.size_)
-    not_visited = np.arange(0, len(dct), 1).tolist()
-    u = dct.get_closest_from(not_visited)
+    dct = Map(start, len(G))
+    not_visited = np.arange(0, len(G), 1).tolist()
+    u = start
     while u is not None:
         not_visited.remove(u)
         for v in G.get_neighbours(u):

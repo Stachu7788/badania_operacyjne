@@ -9,8 +9,6 @@ def a_star(G: Graph, start: int, stop: int):
     for succ in G.get_succesors(start):
         open.add([G[start][succ]+H[succ][stop], start, succ])
     closed = Map(start, len(G))
-    op=open.lst
-    cl=closed.dct
     while True:
         f, u, x = open.get()
         g = f-H[x][stop]
