@@ -3,14 +3,14 @@ from typing import List, Tuple
 from matplotlib import pyplot as plt
 from simple_queue import Queue
 from simple_map import Map
-import copy
+from copy import deepcopy
 """
 Graph
 
 Możliwe parametry wejściowe:
-    M H x y (l)
-    M x y (l)
-    x y C (l)
+    M H x y
+    M x y
+    x y C
     M              *bez rysowania
 
 draw(*args,**kwargs) -> Rysowanie grafu/połączeń/trasy
@@ -26,79 +26,57 @@ get_reachable(id) -> Kolejka sąsiadów
 
 class Graph:
     def __init__(self, *args):
-        self.__assign_variables__(*args)
+        self._assign_variables(*args)
 
     def __getitem__(self, index: int):
-        return self.matrix_[index]
+        return self._matrix[index]
 
     def __len__(self):
-        return self.size_
+        return self._size
     
     def __str__(self):
-        return np.array(self.matrix_).__str__()
+        return np.array(self._matrix).__str__()
 
-    def __make_connections__(self, cons: List[Tuple]):
+    def _make_connections(self, cons: List[Tuple]):
         n = len(cons)
         x = np.zeros([2, n]).tolist()
         y = np.zeros([2, n]).tolist()
         for i in range(n):
-            x[0][i] = self.x_[cons[i][0]]
-            x[1][i] = self.x_[cons[i][1]]
-            y[0][i] = self.y_[cons[i][0]]
-            y[1][i] = self.y_[cons[i][1]]
+            x[0][i] = self._x[cons[i][0]]
+            x[1][i] = self._x[cons[i][1]]
+            y[0][i] = self._y[cons[i][0]]
+            y[1][i] = self._y[cons[i][1]]
         return (x, y)
 
-    def __points__(self, mark):
+    def _points(self, mark):
         if not mark:
             mark = '.'
-        plt.scatter(self.x_, self.y_, marker=mark)
-        for i in range(self.size_):
-            plt.annotate(self.labels[i], (self.x_[i], self.y_[i]))
+        plt.scatter(self._x, self._y, marker=mark)
+        for i in range(self._size):
+            plt.annotate(self._labels[i], (self._x[i], self._y[i]))
 
-    def draw(self, *args, **kwargs):
-        title = kwargs.pop('title', None)
-        mode = 'graph'                            # default mode
-        if args and type(args[0]) is list:
-            if type(args[0][0]) is int:
-                mode = 'path'
-            elif type(args[0][0]) is tuple:
-                mode = 'connections'
-        elif args and type(args[0]) is Map:
-            mode = 'connections'
-            args = (args[0].get_connections(), *args[1:])
-        functions = {'graph': getattr(self, '__draw_graph__'),
-                     'path': getattr(self, '__draw_path__'),
-                     'connections': getattr(self, '__draw_connections__')}
-        titles = {'graph': "Graf",
-                  'path': "Ścieżka",
-                  'connections': "Połączenia"}
-        f = functions[mode]
-        if not title:
-            title = titles[mode]
-        f(*args, **kwargs, title=title)
+    def _draw_graph(self, *args, **kwargs):
+        x, y = self._make_connections(self._cons)
+        self._plot(x, y, *args, **kwargs)
 
-    def __draw_graph__(self, *args, **kwargs):
-        x, y = self.__make_connections__(self.cons_)
-        self.__plot__(x, y, *args, **kwargs)
+    def _draw_connections(self, cons: List[Tuple], *args, **kwargs):
+        x, y = self._make_connections(cons)
+        self._plot(x, y, *args, **kwargs)
 
-    def __draw_connections__(self, cons: List[Tuple], *args, **kwargs):
-        x, y = self.__make_connections__(cons)
-        self.__plot__(x, y, *args, **kwargs)
-
-    def __draw_path__(self, path: List, *args, **kwargs):
+    def _draw_path(self, path: List, *args, **kwargs):
         x=[]
         y=[]
         for i in path:
-            x.append(self.x_[i])
-            y.append(self.y_[i])
-        self.__plot__(x, y, *args, **kwargs)
+            x.append(self._x[i])
+            y.append(self._y[i])
+        self._plot(x, y, *args, **kwargs)
 
-    def __plot__(self, x, y, *args, **kwargs):
+    def _plot(self, x, y, *args, **kwargs):
         if not args:
             args = tuple('b')
         if not kwargs.get('lw'):
             kwargs['lw'] = 0.5
-        self.__points__(kwargs.pop('marker', None))
+        self._points(kwargs.pop('marker', None))
         filetitle = kwargs.pop('savefig', None)
         title = kwargs.pop('title')
         plt.plot(x, y, *args, **kwargs)
@@ -106,34 +84,8 @@ class Graph:
         if filetitle:
             plt.savefig(filetitle)
         plt.show()
-
-    def get_queue(self):
-        return copy.deepcopy(self.queue_)
-
-    def get_neighbours(self, id: int):
-        lst = []
-        for i in range(self.size_):
-            if self.matrix_[id][i] < np.inf and id != i:
-                lst.append(i)
-        return lst
-
-    def get_closest(self, id: int) -> int:
-        dst = np.inf
-        ret = None
-        for i in range(self.size_):
-            if 0 < self.matrix_[id][i] < dst:
-                dst = self.matrix_[id][i]
-                ret = i
-        return ret
-
-    def get_reachable(self, id: int):
-        q_ = Queue()
-        for i in range(self.size_):
-            if 0 < self.matrix_[id][i] < np.inf and id != i:
-                q_.add((self.matrix_[id][i], id, i))
-        return q_
-
-    def __calculate_distances__(self, x, y, con):
+        
+    def _calculate_distances(self, x, y, con):
         if len(x) is not len(y):
             raise Exception("Invalid data")
         else:
@@ -149,7 +101,7 @@ class Graph:
                         M[i][j] = M[j][i] = H[i][j]
             return M, H
 
-    def __arg_parser__(func):
+    def _arg_parser(func):
         def wrapper(self, *args):
 
             arg_order = {1: 'M',    # Possible inputs:
@@ -172,10 +124,8 @@ class Graph:
                 y, args = args[0], args[1:]
             if args and type(args[0]) is list and type(args[0][0]) is tuple:
                 C, args = args[0], args[1:]
-            if args and type(args[0]) is list:
-                L, args = args[0], args[1:]
             if not M:
-                M, H = self.__calculate_distances__(x, y, C)
+                M, H = self._calculate_distances(x, y, C)
             kw_dct = {}
             vars = M, H, x, y, C, L
             for i in range(6):
@@ -184,24 +134,105 @@ class Graph:
             func(self, **kw_dct)
         return wrapper
 
-    @__arg_parser__
-    def __assign_variables__(self, *args, **dict_args):
-        self.matrix_ = dict_args.pop('M', None)
-        self.H = dict_args.pop('H', None)
-        self.x_ = dict_args.pop('x', None)
-        self.y_ = dict_args.pop('y', None)
-        self.size_ = len(self.matrix_)
-        self.labels = dict_args.pop('l', None)
-        if not self.labels or len(self.labels) != self.size_:
-            self.labels = np.arange(0, self.size_).tolist()
-        self.queue_ = Queue()
-        self.cons_ = dict_args.pop('C', [])
-        if not self.cons_:
-            for i in range(self.size_):
-                for j in range(i+1, self.size_):
-                    if self[i][j] < np.inf:
-                        self.cons_.append((i, j))
-                        self.queue_.add((self[i][j], i, j))
+    def is_directed(self) -> bool:
+        return self._dir
+
+    @_arg_parser
+    def _assign_variables(self, *args, **dict_args):
+        self._matrix = dict_args.pop('M', None)
+        if np.array_equal(np.array(self._matrix),np.array(self._matrix).T):
+            self._dir = False
         else:
-            for i, j in self.cons_:
-                self.queue_.add((self.matrix_[i][j], i, j))
+            self._dir = True
+        self._H = dict_args.pop('H', None)
+        self._x = dict_args.pop('x', None)
+        self._y = dict_args.pop('y', None)
+        self._size = len(self._matrix)
+        self._succ = {}
+        self._pred = {}
+        for i in range(self._size):
+            self._succ[i] = []
+            self._pred[i] = []
+        self._labels = np.arange(0, self._size).tolist()
+        self._queue = Queue()
+        self._cons = dict_args.pop('C', [])
+        for i in range(self._size):
+            for j in range(i+1, self._size):
+                if 0 < self._matrix[i][j] < np.inf:
+                    self._succ[i].append(j)
+                    self._pred[j].append(i)
+                if 0 < self._matrix[j][i] < np.inf:
+                    self._succ[j].insert(0, i)
+                    self._pred[i].insert(0, j)
+        if not self._cons:
+            for i in range(self._size):
+                for j in range(i+1, self._size):
+                    if self[i][j] < np.inf:
+                        self._cons.append((i, j))
+                        self._queue.add((self[i][j], i, j))
+                    if self._dir and self[j][i] < np.inf:
+                        self._cons.append((j, i))
+                        self._queue.add((self[j][i], j, i))
+        else:
+            for i, j in self._cons:
+                self._queue.add((self._matrix[i][j], i, j))
+
+
+    def H(self):
+        return self._H
+    
+    def M(self):
+        return deepcopy(self._matrix)
+
+    def draw(self, *args, **kwargs):
+        title = kwargs.pop('title', None)
+        mode = 'graph'                            # default mode
+        if args and type(args[0]) is list:
+            if type(args[0][0]) is int:
+                mode = 'path'
+            elif type(args[0][0]) is tuple:
+                mode = 'connections'
+        elif args and type(args[0]) is Map:
+            mode = 'connections'
+            args = (args[0].get_connections(), *args[1:])
+        functions = {'graph': getattr(self, '_draw_graph'),
+                     'path': getattr(self, '_draw_path'),
+                     'connections': getattr(self, '_draw_connections')}
+        titles = {'graph': "Graf",
+                  'path': "Ścieżka",
+                  'connections': "Połączenia"}
+        f = functions[mode]
+        if not title:
+            title = titles[mode]
+        f(*args, **kwargs, title=title)
+
+    def get_queue(self):
+        return deepcopy(self._queue)
+
+    def get_neighbours(self, id: int) -> List[int]:
+        return self._succ[id]
+
+    def get_succesors(self, id: int) -> List[int]:
+        return self._succ[id]
+
+    def get_predecessors(self, id: int) -> List[int]:
+        return self._pred[id]
+    
+    def get_connections(self):
+        return self._cons
+
+    def get_closest(self, id: int) -> int:
+        max_dist = np.inf
+        closest = None
+        for succ in self._succ[id]:
+            if self._matrix[id][succ] < max_dist:
+                closest = succ
+                max_dist = self._matrix[id][succ]
+        return closest
+
+    def get_reachable(self, id: int) -> Queue:
+        q = Queue()
+        for succ in self._succ[id]:
+            q.add((self._matrix[id][succ], id, succ))
+        return q
+
