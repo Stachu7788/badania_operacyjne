@@ -134,7 +134,6 @@ class Graph:
                            1/2*(self._y[u]+self._y[v]))
                 ret.append(((s, xy, xytext),{}))
         return ret
-                
 
     def _arg_parser(func):
         def wrapper(self, *args):
@@ -168,9 +167,6 @@ class Graph:
                     kw_dct[arg_order[i+1]] = vars[i]
             func(self, **kw_dct)
         return wrapper
-
-    def is_directed(self) -> bool:
-        return self._dir
 
     @_arg_parser
     def _assign_variables(self, *args, **dict_args):
@@ -212,6 +208,8 @@ class Graph:
             for i, j in self._cons:
                 self._queue.add((self._matrix[i][j], i, j))
 
+    def is_directed(self) -> bool:
+        return self._dir
 
     def H(self):
         return self._H
