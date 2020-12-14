@@ -1,11 +1,11 @@
-from simple_queue import Queue
+from binary_heap import BinaryHeap
 from graph import Graph
 from simple_map import Map
 
 
 def a_star(G: Graph, start: int, stop: int):
     H = G.H
-    open = Queue()
+    open = BinaryHeap()
     for succ in G.get_succesors(start):
         open.add([G[start][succ]+H[succ][stop], start, succ])
     closed = Map(start, len(G))

@@ -1,9 +1,10 @@
 import numpy as np
 from typing import List, Tuple
 from matplotlib import pyplot as plt
-from simple_queue import Queue
 from simple_map import Map
 from copy import deepcopy
+from simple_queue import Queue
+
 """
 Graph
 
@@ -21,15 +22,20 @@ draw(*args,**kwargs) -> Rysowanie grafu/połączeń/trasy
 get_neighbours(id) -> Lista sąsiadów
 get_closest(id) -> Najbliższy sąsiad
 get_reachable(id) -> Kolejka sąsiadów
+get_queue() -> Zwróć kolejkę połączeń
+get_succesors(id) -> Sukcesorzy
+get_predessesors(id) -> Poprzednicy
+get_connections() -> Połączenia [(u do v)]
 """
 
 
 class Graph:
     def __init__(self, *args):
+        self._queueType = Queue
         self._assign_variables(*args)
 
     def __getitem__(self, index: int):
-        return self._matrix[index]
+        return self._info[index]
 
     def __len__(self):
         return self._size
@@ -57,19 +63,13 @@ class Graph:
 
     def _draw_graph(self, *args, **kwargs):
         x, y = self._make_connections(self._cons)
-        if 'annotate' in kwargs and kwargs['annotate']:
-            kwargs['annotate'] = self._annotations(self._cons)  
         self._plot(x, y, *args, **kwargs)
 
     def _draw_connections(self, cons: List[Tuple], *args, **kwargs):
         x, y = self._make_connections(cons)
-        if 'annotate' in kwargs and kwargs['annotate']:
-            kwargs['annotate'] = self._annotations(cons)            
         self._plot(x, y, *args, **kwargs)
 
     def _draw_path(self, path: List, *args, **kwargs):
-        if 'annotate' in kwargs and kwargs['annotate']:
-            kwargs['annotate'] = self._annotations(path)  
         x=[]
         y=[]
         for i in path:
@@ -82,18 +82,10 @@ class Graph:
             args = tuple('b')
         if not kwargs.get('lw'):
             kwargs['lw'] = 0.5
-        plt.axes((0.0,0.0,1.0,1.0))
-        annotations = kwargs.pop('annotate', None)
         self._points(kwargs.pop('marker', None))
         filetitle = kwargs.pop('savefig', None)
         title = kwargs.pop('title')
         plt.plot(x, y, *args, **kwargs)
-        if annotations:
-            for tup in annotations:
-                pos, kwrds = tup
-                plt.annotate(pos[0],pos[2],color='r')
-                if kwrds:
-                    plt.annotate('',*pos[1:],**kwrds)
         plt.title(title)
         if filetitle:
             plt.savefig(filetitle)
@@ -115,25 +107,13 @@ class Graph:
                         M[i][j] = M[j][i] = H[i][j]
             return M, H
 
-    def _annotations(self, arg: List[Tuple] or List[int]):
-        if type(arg[0]) is int:
-            arg, path = [], arg
-            for i in range(len(path)-1):
-                arg.append((path[i], path[i+1]))
-        ret = []
-        for u, v in arg:
-            s = self[u][v]
-            xy = float(self._x[u]), float(self._y[u])
-            if self._dir:
-                xytext = (1/3*self._x[v]+2/3*self._x[u], 
-                          1/3*self._y[v]+2/3*self._y[u])
-                arrowprops = {'arrowprops': {'arrowstyle': '<-'}}
-                ret.append(((s, xy, xytext), arrowprops))
-            else:
-                xytext =  (1/2*(self._x[u]+self._x[v]), 
-                           1/2*(self._y[u]+self._y[v]))
-                ret.append(((s, xy, xytext),{}))
-        return ret
+    def _create_shortest_paths(self, fun):
+        self._shortest_paths = {}
+        for i in range(len(self)):
+            self._shortest_paths[i] = {}
+            map_: Map = fun(self, i)
+            for j in range(len(self)):
+                self._shortest_paths[i][j] = map_.reconstruct_path(i, j)[0]
 
     def _arg_parser(func):
         def wrapper(self, *args):
@@ -156,7 +136,7 @@ class Graph:
             if args and type(args[0][0]) is int:    # are 2 leading type list
                 x, args = args[0], args[1:]
                 y, args = args[0], args[1:]
-            if args and type(args[0]) is list and type(args[0][0]) is tuple:
+            if args and type(args[0]) is list:
                 C, args = args[0], args[1:]
             if not M:
                 M, H = self._calculate_distances(x, y, C)
@@ -167,6 +147,9 @@ class Graph:
                     kw_dct[arg_order[i+1]] = vars[i]
             func(self, **kw_dct)
         return wrapper
+
+    def is_directed(self) -> bool:
+        return self._dir
 
     @_arg_parser
     def _assign_variables(self, *args, **dict_args):
@@ -181,11 +164,15 @@ class Graph:
         self._size = len(self._matrix)
         self._succ = {}
         self._pred = {}
+        self._info = {}
         for i in range(self._size):
             self._succ[i] = []
             self._pred[i] = []
+            self._info[i] = {}
+            for j in range(self._size):
+                self._info[i][j] = self._matrix[i][j]
         self._labels = np.arange(0, self._size).tolist()
-        self._queue = Queue()
+        self._queue = self._queueType()
         self._cons = dict_args.pop('C', [])
         for i in range(self._size):
             for j in range(i+1, self._size):
@@ -208,8 +195,6 @@ class Graph:
             for i, j in self._cons:
                 self._queue.add((self._matrix[i][j], i, j))
 
-    def is_directed(self) -> bool:
-        return self._dir
 
     def H(self):
         return self._H
@@ -218,6 +203,8 @@ class Graph:
         return deepcopy(self._matrix)
 
     def draw(self, *args, **kwargs):
+        if args and not len(args[0]):
+            return None
         title = kwargs.pop('title', None)
         mode = 'graph'                            # default mode
         if args and type(args[0]) is list:
@@ -238,6 +225,9 @@ class Graph:
         if not title:
             title = titles[mode]
         f(*args, **kwargs, title=title)
+
+    def create_shortest_paths(self, function):
+        self._create_shortest_paths(function)
 
     def get_queue(self):
         return deepcopy(self._queue)
@@ -263,8 +253,8 @@ class Graph:
                 max_dist = self._matrix[id][succ]
         return closest
 
-    def get_reachable(self, id: int) -> Queue:
-        q = Queue()
+    def get_reachable(self, id: int):
+        q = self._queueType()
         for succ in self._succ[id]:
             q.add((self._matrix[id][succ], id, succ))
         return q
