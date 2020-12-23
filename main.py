@@ -22,7 +22,7 @@ from kruskal import kruskal                  #(List[Tuple],float)
 # bubble: 1.23
 
 
-G = Graph(*create_matrix(25,25,30,dst=7))
+G = Graph(*create_matrix(25,25,20,dst=7))
 G.draw()
 H = Graph(G.H())
 q=H.get_queue()

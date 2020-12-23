@@ -1,23 +1,12 @@
-class A:
-    def __init__(self,num):
-        self.a = num
-        
-    def get(self):
-        return self.a
-    
-class B(A):
-    def __init__(self,num,str_):
-        super().__init__(num)
-        self.b=str_
-    
-    def get(self):
-        return self.a,self.b
-        
-        
-ob_a = A(5)
-print(ob_a.get())
-print(type(ob_a))
-ob_b = B(2,'string')
-print(ob_b.get())
-print(type(ob_b))
-print(type(super(type(ob_b))))
+with open('test.txt', 'r+') as file:
+    line1 = 'This is line 1\n'
+    line2 = [[1, 2, 3], [3, 2, 6]]
+    line3 = 'Text of line 3\n'
+    if False:
+        file.write(line1)
+        file.write(str(line2)+'\n')
+        file.write(line3)
+    for line in file:
+        print(line, end='')
+    print('')
+    print()

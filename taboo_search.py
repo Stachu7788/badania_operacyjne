@@ -7,23 +7,26 @@ def taboo_search(G: Graph, profit: np.ndarray, s0: List[int]):
     gpl = G, profit, 6
     sBest = s0
     bestCandidate = s0
-    fit = [fitness(*gpl, s0)]
-    lst = [s0]
+    fitness_lst = [fitness(*gpl, s0)]
     tabuList = []
+    neig_num = []
     tabuList.append(s0)
-    for _ in range(500):
+    iterations_wo_change = 0
+    while iterations_wo_change < 200:
+        iterations_wo_change += 1
         sNeighbourhood = get_neighbours(G, bestCandidate)
+        neig_num.append(len(sNeighbourhood))
         bestCandidate = sNeighbourhood[0]
         for sCandidate in sNeighbourhood:
             if(sCandidate not in tabuList and
                fitness(*gpl, sCandidate) > fitness(*gpl, bestCandidate)):
                 bestCandidate = sCandidate
-        fit.append(fitness(*gpl, bestCandidate))
-        lst.append(bestCandidate)
+        fitness_lst.append(fitness(*gpl, bestCandidate))
         if fitness(*gpl, bestCandidate) > fitness(*gpl, sBest):
             sBest = bestCandidate
+            iterations_wo_change = 0
         tabuList.append(bestCandidate)
-    return sBest, fit, lst
+    return sBest, fitness_lst, neig_num
 
 
 def get_neighbours(G: Graph, sol: List[int]):

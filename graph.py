@@ -226,6 +226,28 @@ class Graph:
             title = titles[mode]
         f(*args, **kwargs, title=title)
 
+    def random_path(self, n: int):
+        path = [np.random.randint(0, len(self))]
+        discrete_uniform = {0 : 150, 1: 10, 2: 5, 3: 1, 4: 1, 5: 1, 6: 1}
+        vertex_account = len(self) * [0]
+        last_occurance = len(self) * [10]
+        vertex_account[path[0]] = 1
+        while len(path) < n:
+            nxt = None
+            choices = None
+            choices = []
+            succ = self.get_succesors(path[-1])
+            for v in succ:
+                choices += (discrete_uniform[vertex_account[v]] +
+                            last_occurance[v]) * [v]
+                nxt = np.random.choice(choices)
+            path.append(nxt)
+            vertex_account[nxt] += 1
+            for val in last_occurance:
+                val += 1
+            last_occurance[nxt] = 0
+        return path            
+
     def create_shortest_paths(self, function):
         self._create_shortest_paths(function)
 
