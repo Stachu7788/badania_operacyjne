@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from matplotlib import pyplot as plt
 from simple_map import Map
 from copy import deepcopy
@@ -35,7 +35,7 @@ class Graph:
         self._assign_variables(*args)
 
     def __getitem__(self, index: int):
-        return self._info[index]
+        return self._matrix[index]
 
     def __len__(self):
         return self._size
@@ -164,13 +164,9 @@ class Graph:
         self._size = len(self._matrix)
         self._succ = {}
         self._pred = {}
-        self._info = {}
         for i in range(self._size):
             self._succ[i] = []
             self._pred[i] = []
-            self._info[i] = {}
-            for j in range(self._size):
-                self._info[i][j] = self._matrix[i][j]
         self._labels = np.arange(0, self._size).tolist()
         self._queue = self._queueType()
         self._cons = dict_args.pop('C', [])
@@ -251,19 +247,31 @@ class Graph:
     def create_shortest_paths(self, function):
         self._create_shortest_paths(function)
 
+    def shortest_paths(self):
+        return self._shortest_paths
+
     def get_queue(self):
         return deepcopy(self._queue)
 
-    def get_neighbours(self, id: int) -> List[int]:
-        return self._succ[id]
+    def get_neighbours(self, id: int = None):
+        if id is not None:
+            return self._succ[id]
+        else:
+            return self._succ
 
-    def get_succesors(self, id: int) -> List[int]:
-        return self._succ[id]
+    def get_succesors(self, id: int = None):
+        if id is not None:
+            return self._succ[id]
+        else:
+            return self._succ
 
-    def get_predecessors(self, id: int) -> List[int]:
-        return self._pred[id]
-    
-    def get_connections(self):
+    def get_predecessors(self, id: int = None):
+        if id is not None:
+            return self._pred[id]
+        else:
+            return self._pred
+
+    def get_connections(self) -> List[tuple]:
         return self._cons
 
     def get_closest(self, id: int) -> int:
