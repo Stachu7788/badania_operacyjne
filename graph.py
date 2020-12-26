@@ -164,6 +164,7 @@ class Graph:
         self._size = len(self._matrix)
         self._succ = {}
         self._pred = {}
+        self._shortest_paths_created = False
         for i in range(self._size):
             self._succ[i] = []
             self._pred[i] = []
@@ -245,7 +246,12 @@ class Graph:
         return path            
 
     def create_shortest_paths(self, function):
-        self._create_shortest_paths(function)
+        if not self._shortest_paths_created:
+            try:
+                self._create_shortest_paths(function)
+                self._shortest_paths_created = True
+            except:
+                raise Graph_Error("Cannot create shortest paths")
 
     def shortest_paths(self):
         return self._shortest_paths
@@ -289,3 +295,8 @@ class Graph:
             q.add((self._matrix[id][succ], id, succ))
         return q
 
+
+class Graph_Error(Exception):
+    def __init__(self, message):
+        self.message = message
+    

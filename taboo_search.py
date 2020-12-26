@@ -17,7 +17,7 @@ def taboo_search(G: Graph, profit: np.ndarray, s0: List[int],
 # =============================================================================
 #     while iterations_wo_change < 200:
 # =============================================================================
-    for i in range(60):
+    for i in range(100):
         iterations_wo_change += 1
         sNeighbourhood = get_neighbours(G, bestCandidate)
         neig_num.append(len(sNeighbourhood))
@@ -36,66 +36,66 @@ def taboo_search(G: Graph, profit: np.ndarray, s0: List[int],
     return sBest, fitness_lst, neig_num, candidates
 
 
-def get_neighbours(G: Graph, sol: List[int]):
-    paths = G.shortest_paths()
-    vertices = G.get_neighbours()
-    neigbours = []
-    neigbours.append(sol[1:])
-    neigbours.append(sol[:-1])
-    for num in [1, 2, 3]:
-        diff = num + 1
-        for i in range(len(sol)-diff):
-            u, v = sol[i], sol[i+diff]
-            if u == v:
-                continue
-            insert = paths[u][v][1:-1]
-            if not len(insert):
-                common = set(vertices[u]) & set(vertices[v])
-                if common:
-                    for vertex in common:
-                        neigbours.append(sol[:i]+[vertex]+sol[i+diff:])
-            neigbours.append(sol[:i]+insert[:]+sol[i+diff:])
-    for i in range(len(sol) - 1):
-        u, v = sol[i], sol[i+1]
-        common = set(vertices[u]) & set(vertices[v])
-        if common:
-            for vertex in common:
-                neigbours.append(sol[:i]+[vertex]+sol[i+1:])
-        for u_neig in vertices[u]:
-            common = set(vertices[u_neig]) & set(vertices[v])
-            if common:
-                try:
-                    common.remove(u)
-                except KeyError:
-                    pass
-                for vertex in common:
-                    neigbours.append(sol[:i]+[u_neig, vertex]+sol[i+1:])
-    return neigbours
-
 # =============================================================================
 # def get_neighbours(G: Graph, sol: List[int]):
-#     paths = G._shortest_paths
-#     size = len(G)
+#     paths = G.shortest_paths()
+#     vertices = G.get_neighbours()
 #     neigbours = []
 #     neigbours.append(sol[1:])
 #     neigbours.append(sol[:-1])
-#     for _ in range(2):
-#         for i in range(len(sol)-1):
-#             while True:
-#                 v = np.random.randint(0, size)
-#                 if v != sol[i] and v != sol[i+1]:
-#                     break
-#             iv = paths[sol[i]][v]
-#             vj = paths[v][sol[i+1]]
-#             insert = iv[1:] + vj[1:-1]
-#             neigbours.append(sol[:i+1]+insert[:]+sol[i+1:])
-#         for i in range(len(sol)-2-_):
-#             diff = 2+_
-#             if i != i+diff:
-#                 insert = paths[sol[i]][sol[i+diff]][1:-1]
-#                 neigbours.append(sol[:i]+insert[:]+sol[i+diff:])
+#     for num in [1, 2, 3]:
+#         diff = num + 1
+#         for i in range(len(sol)-diff):
+#             u, v = sol[i], sol[i+diff]
+#             if u == v:
+#                 continue
+#             insert = paths[u][v][1:-1]
+#             if insert == sol[i+1:diff]:
+#                 continue
+#             neigbours.append(sol[:i+1]+insert[:]+sol[i+diff:])
+#             if not len(insert):
+#                 common = set(vertices[u]) & set(vertices[v])
+#                 if common:
+#                     for vertex in common:
+#                         neigbours.append(sol[:i+1]+[vertex]+sol[i+diff:])
+#     for i in range(len(sol) - 1):
+#         u, v = sol[i], sol[i+1]
+#         common = set(vertices[u]) & set(vertices[v])
+#         if common:
+#             for vertex in common:
+#                 neigbours.append(sol[:i+1]+[vertex]+sol[i+1:])
+#         for u_neig in vertices[u]:
+#             if u_neig == v:
+#                 continue
+#             common = set(vertices[u_neig]) & set(vertices[v])
+#             common.remove(u)
+#             for vertex in common:
+#                 neigbours.append(sol[:i+1]+[u_neig, vertex]+sol[i+1:])
 #     return neigbours
 # =============================================================================
+
+def get_neighbours(G: Graph, sol: List[int]):
+    paths = G._shortest_paths
+    size = len(G)
+    neigbours = []
+    neigbours.append(sol[1:])
+    neigbours.append(sol[:-1])
+    for _ in range(2):
+        for i in range(len(sol)-1):
+            while True:
+                v = np.random.randint(0, size)
+                if v != sol[i] and v != sol[i+1]:
+                    break
+            iv = paths[sol[i]][v]
+            vj = paths[v][sol[i+1]]
+            insert = iv[1:] + vj[1:-1]
+            neigbours.append(sol[:i+1]+insert[:]+sol[i+1:])
+        for i in range(len(sol)-2-_):
+            diff = 2+_
+            if i != i+diff:
+                insert = paths[sol[i]][sol[i+diff]][1:-1]
+                neigbours.append(sol[:i]+insert[:]+sol[i+diff:])
+    return neigbours
 
 
 def fitness(G: Graph, profit_table: np.ndarray, loss_coef: float,
