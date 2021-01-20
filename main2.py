@@ -27,5 +27,3 @@ from dijkstra import dijkstra
 # print(fitness(G, profit_table, 6, ret[0]))
 # =============================================================================
 
-a=Graph([1,2,0],[2,0,1],[(1,2)])
-a.create_shortest_paths(dijkstra)

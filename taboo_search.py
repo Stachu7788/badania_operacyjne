@@ -1,35 +1,30 @@
 from graph import Graph
 import numpy as np
 from typing import List
+from data_class import Data
 
 
-def taboo_search(G: Graph, profit: np.ndarray, s0: List[int],
-                 loss_coeficient: float):
-    graph_data = G, profit, loss_coeficient
-    sBest = s0
-    bestCandidate = s0
-    fitness_lst = [fitness(*graph_data, s0)]
+def taboo_search(D: Data):
+    sBest = D.s0
+    bestCandidate = sBest
+    fitness_lst = [fitness(D, sBest)]
     tabuList = []
     neig_num = []
     candidates = []
-    tabuList.append(s0)
+    tabuList.append(sBest)
     iterations_wo_change = 0
-# =============================================================================
-#     while iterations_wo_change < 200:
-# =============================================================================
-    for i in range(100):
+    while iterations_wo_change < 200:
         iterations_wo_change += 1
-        sNeighbourhood = get_neighbours(G, bestCandidate)
+        sNeighbourhood = get_neighbours(D, bestCandidate)
         neig_num.append(len(sNeighbourhood))
         bestCandidate = sNeighbourhood[0]
         for sCandidate in sNeighbourhood:
             if(sCandidate not in tabuList and
-               fitness(*graph_data, sCandidate) > fitness(*graph_data,
-                                                          bestCandidate)):
+               fitness(D, sCandidate) > fitness(D, bestCandidate)):
                 bestCandidate = sCandidate
-        fitness_lst.append(fitness(*graph_data, bestCandidate))
+        fitness_lst.append(fitness(D, bestCandidate))
         candidates.append(bestCandidate)
-        if fitness(*graph_data, bestCandidate) > fitness(*graph_data, sBest):
+        if fitness(D, bestCandidate) > fitness(D, sBest):
             sBest = bestCandidate
             iterations_wo_change = 0
         tabuList.append(bestCandidate)
@@ -74,7 +69,8 @@ def taboo_search(G: Graph, profit: np.ndarray, s0: List[int],
 #     return neigbours
 # =============================================================================
 
-def get_neighbours(G: Graph, sol: List[int]):
+def get_neighbours(D: Data, sol: List[int]):
+    G = D.graph
     paths = G._shortest_paths
     size = len(G)
     neigbours = []
@@ -98,15 +94,14 @@ def get_neighbours(G: Graph, sol: List[int]):
     return neigbours
 
 
-def fitness(G: Graph, profit_table: np.ndarray, loss_coef: float,
-            sol: List[int]):
+def fitness(data: Data, sol: List[int]):
     profit = 0
-    profit_table = profit_table.copy()
+    profit_table = data.profit_table.copy()
     for i in range(len(sol)):
         if i < len(sol) - 1:    # 'i' nie jest ostatnie w rozwiązaniu
             for prof_ix in sol[i+1:]:
                 profit += profit_table[sol[i]][prof_ix]
                 profit_table[sol[i]][prof_ix] = 0
         if i > 0:               # 'i' nie jest pierwsze w rozwiązaniu
-            profit -= loss_coef * G[sol[i-1]][sol[i]]
-    return np.round(profit,2)
+            profit -= data.loss_coeficient * Data[sol[i-1]][sol[i]]
+    return np.round(profit, 2)

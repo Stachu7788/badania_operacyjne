@@ -200,8 +200,10 @@ class Graph:
         return deepcopy(self._matrix)
 
     def draw(self, *args, **kwargs):
+        if self._x is None:
+            raise Graph_Error("Graph cannot be drawn")
         if args and not len(args[0]):
-            return None
+            raise Graph_Error("Some drawing issues")
         title = kwargs.pop('title', None)
         mode = 'graph'                            # default mode
         if args and type(args[0]) is list:
