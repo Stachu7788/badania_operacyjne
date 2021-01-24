@@ -297,6 +297,11 @@ class Graph:
             q.add((self._matrix[id][succ], id, succ))
         return q
 
+    def vertices(self):
+        return len(self)
+
+    def edges(self):
+        return len(self._cons)
 
 class Graph_Error(Exception):
     def __init__(self, message):
