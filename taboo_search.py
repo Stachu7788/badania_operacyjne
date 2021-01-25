@@ -36,7 +36,8 @@ def get_neighbours(D: Data, sol: List[int]):
     neigbours.append(sol[:-1])
     # Deletion
     for num in [1, 2, 3]:
-        I_ = np.random.randint(1, len(sol)-1-num, int((4-num)/4*len(sol)))
+        I_ = np.random.permutation(np.arange(0, len(sol)-num-1))
+        I_ = I_[:int((4-num)/4*len(sol))]
         for i in I_:
             u, v = sol[i], sol[i+num+1]
             insert = paths[u][v][1:-1]
@@ -89,7 +90,7 @@ def get_neighbours(D: Data, sol: List[int]):
 # =============================================================================
 
 def fitness(data: Data, sol: List[int]):
-    profit = 0
+    profit: float = 0
     profit_table = data.profit_table.copy()
     for i in range(len(sol)):
         if i < len(sol) - 1:    # 'i' nie jest ostatnie w rozwiązaniu
@@ -99,3 +100,10 @@ def fitness(data: Data, sol: List[int]):
         if i > 0:               # 'i' nie jest pierwsze w rozwiązaniu
             profit -= data.loss_coeficient * data[sol[i-1]][sol[i]]
     return np.round(profit, 2)
+
+
+def profit_table(n: int):
+    profit_table = np.round(10 * np.random.rand(n, n), 2)
+    for i in range(n):
+        profit_table[i][i] = 0
+    return profit_table

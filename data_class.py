@@ -11,11 +11,7 @@ class Data:
         self.s0 = s0
         self.loss_coeficient = loss_coeficient
         self.profit_table = profit_table
-        self.number_of_neighbours_lst = []
-        self.best_solution = []
-        self.best_fitness = 0
-        self.best_candidate_lst = []
-        self.best_candidates_fitness_lst = []
+        self._init_()
 
     def __getitem__(self, ix: int):
         return self.graph[ix]
@@ -27,10 +23,22 @@ class Data:
         self._calculate()
         return repr(self.info)
 
+    def _init_(self):
+        self.number_of_neighbours_lst = []
+        self.best_solution = []
+        self.best_fitness = 0
+        self.best_candidate_lst = []
+        self.best_candidates_fitness_lst = []
+        self.number_of_iterations = 0
+
+    def clear(self):
+        self._init_()
+
     def add_iteration(self, num: int, candidate: List[int], fitness: float):
         self.best_candidate_lst.append(candidate)
         self.number_of_neighbours_lst.append(num)
         self.best_candidates_fitness_lst.append(fitness)
+        self.number_of_iterations += 1
 
     def solution(self, sol: List[int] = None, fit: float = None):
         if sol is None:

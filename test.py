@@ -1,12 +1,27 @@
-with open('test.txt', 'r+') as file:
-    line1 = 'This is line 1\n'
-    line2 = [[1, 2, 3], [3, 2, 6]]
-    line3 = 'Text of line 3\n'
-    if False:
-        file.write(line1)
-        file.write(str(line2)+'\n')
-        file.write(line3)
-    for line in file:
-        print(line, end='')
-    print('')
-    print()
+from graph_templates import graph_list
+from data_class import Data
+from taboo_search import taboo_search, profit_table, fitness
+# =============================================================================
+# graph_list: List[Graph, sol0: List]
+# Graph0 :  vertices: 13, edges: 25
+# Graph1 :  vertices: 21, edges: 43
+# Graph2 :  vertices: 25, edges: 45
+# Graph3 :  vertices: 16, edges: 33
+# =============================================================================
+
+G, s0 = graph_list[3]
+loss_coefficient = 5
+pt = profit_table(len(G))
+D = Data(G, pt, loss_coefficient, s0)
+
+# Test liczby iteracji
+iter_num = []
+sol = []
+fit = []
+for _ in range(10):
+    taboo_search(D)
+    iter_num.append(D.number_of_iterations)
+    sol.append(D.best_solution)
+    fit.append(fitness(D.best_solution))
+    D.clear()
+    D.s0 = sol[-1]
