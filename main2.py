@@ -14,7 +14,7 @@ from data_class import Data
 
 G, s0 = graph_list[3]
 pt = profit_table(len(G))
-D = Data(G, pt, 10, s0)
+D = Data(G, pt, 5, s0)
 ret = taboo_search(D)
 
 
