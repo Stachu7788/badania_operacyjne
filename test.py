@@ -14,14 +14,4 @@ loss_coefficient = 5
 pt = profit_table(len(G))
 D = Data(G, pt, loss_coefficient, s0)
 
-# Test liczby iteracji
-iter_num = []
-sol = []
-fit = []
-for _ in range(10):
-    taboo_search(D)
-    iter_num.append(D.number_of_iterations)
-    sol.append(D.best_solution)
-    fit.append(fitness(D.best_solution))
-    D.clear()
-    D.s0 = sol[-1]
+
